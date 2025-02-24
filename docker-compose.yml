@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  dice-app:
+    image: dice-detection-app:1.0
+    container_name: dice_detection_app
+    build: .
+    volumes:
+      - ./models:/app/models
+      - ./configs:/app/configs
+      - ./logs:/app/logs
+    depends_on:
+      - mysql  # 確保先啟動 MySQL 容器
+    networks:
+      - my_network
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: stanley123
+      MYSQL_DATABASE: dicedb
+    ports:
+      - "3306:3306"  # MySQL 的預設端口
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql-data:/var/lib/mysql  # 使數據持久化
+    networks:
+      - my_network
+
+volumes:
+  mysql-data:  # 設置 MySQL 數據的持久化
+
+networks:
+  my_network:

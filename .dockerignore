@@ -1,0 +1,5 @@
+models/*
+configs/*
+logs/*
+*.sql
+__pycache__/
