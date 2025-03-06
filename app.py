@@ -15,7 +15,7 @@ from datetime import datetime
 
 from modules.ocr import OCRObserver
 from modules.vstream import VideoStream
-from modules.detector import DiceDetector
+from modules.detector import DiceDetector, DiceCupBaseDetector
 from modules.db import Database
 
 # 定義骰子狀態
@@ -35,12 +35,13 @@ class DiceApp:
         self.stable_count = 0
         self.stable_threshold = self.config['detector']['stable_threshold']
         self.previous_positions = None
-        self.row_height = (self.config['detector']['detect_area']['ymax'] - self.config['detector']['detect_area']['ymin']) / self.config['detector']['rows']
-        self.col_width = (self.config['detector']['detect_area']['xmax'] - self.config['detector']['detect_area']['xmin']) / self.config['detector']['cols']
+        self.row_height = self.config['detector']['dice_detection_zone_height'] / self.config['detector']['rows']
+        self.col_width = self.config['detector']['dice_detection_zone_width'] / self.config['detector']['cols']
         
         self.db = Database(self.logger, self.config)
         self.ocr = OCRObserver(self.logger)
-        self.detector = DiceDetector(self.config)
+        self.dice_cup_base_detector = DiceCupBaseDetector(self.config)
+        self.dice_detector = DiceDetector()
         self.logger.info("[DiceApp] models loaded !! Starting Video Stream Connection...")
         
         self.vs = VideoStream(self.logger, self.config)
@@ -87,6 +88,7 @@ class DiceApp:
     
     def write_result(self, sorted_index, positions, detections, frame):
         # 骰子值和位在哪一個row和col
+
         value_row_col = []
         for i in range(len(positions)):
             v = DICE_VALUE_STR[detections[sorted_index[i]][5]]
@@ -109,8 +111,13 @@ class DiceApp:
         self.db.insert_log(dices_str, system_time_str, detected_time_str)
 
     def detect_dice(self, frame):
+        found_dice_cup_base, dice_detect_zone = self.dice_cup_base_detector.detect(frame)
+
+        if not found_dice_cup_base:
+            self.logger.warning(f"[DiceApp] Dice cup base not found !!")
+            return
         # 偵測骰子
-        detections = self.detector.detect(frame)
+        detections = self.dice_detector.detect(dice_detect_zone)
         num_dice = len(detections)
 
         # 判斷骰子狀態
@@ -129,10 +136,10 @@ class DiceApp:
 
                 bottom_centers.append((x_center, y_center))    
             current_positions = np.array(bottom_centers)
-            sorted_index = np.lexsort(current_positions.T) # 先根據 x 排序，若 x 相同則用 y 排序
+            sorted_index = np.lexsort(current_positions.T)
             current_positions = current_positions[sorted_index]
 
-            if self.previous_positions is not None and not np.allclose(self.previous_positions, current_positions, atol=5):
+            if self.previous_positions is not None and not np.allclose(self.previous_positions, current_positions, atol=15):
                 self.stable_count = 0  # 重新計算穩定次數
                 if self.dice_state == DiceState.STILL:
                     self.logger.info("[DiceApp] Dice rolling detected!!")

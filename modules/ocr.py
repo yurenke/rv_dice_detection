@@ -21,8 +21,8 @@ class OCRObserver():
     def load_yolo(self):
         path_yolov8  = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'models', 'yolo', 'search_panel.pt')
         self.model_yolo_panel = YOLO(path_yolov8).to('cpu')
-        path_yolov8  = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'models', 'yolo', 'get_datetime.pt')
-        self.model_yolo_datetime = YOLO(path_yolov8).to('cpu')
+        # path_yolov8  = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'models', 'yolo', 'get_datetime.pt')
+        # self.model_yolo_datetime = YOLO(path_yolov8).to('cpu')
 
     def load_parseq(self):
         _local_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'parseq')
@@ -64,11 +64,14 @@ class OCRObserver():
         """ use yolo model get datetime in panel images
         
         """
-        results = self.model_yolo_datetime(panel, verbose=False)
-        xyxy = self.get_position_by_yolo_results(results, names=self.model_yolo_datetime.names, target_name='datetime')
-        image = self.get_cropped_image_by_position(image=panel, xyxy=xyxy)
+        h, w, _ = panel.shape
+
+        return panel[int(h / 3): int(h * 2 / 3), :]
+        # results = self.model_yolo_datetime(panel, verbose=False)
+        # xyxy = self.get_position_by_yolo_results(results, names=self.model_yolo_datetime.names, target_name='datetime')
+        # image = self.get_cropped_image_by_position(image=panel, xyxy=xyxy)
         
-        return image, xyxy
+        # return image, xyxy
 
     def parseq_parse(self, img):
         
@@ -86,8 +89,11 @@ class OCRObserver():
         dt_str = None
         panel, _ = self.crop_panel_from_frame(img)
 
+        if panel is None:
+            self.logger.warning('[OCR] panel not found')
+
         if panel is not None:
-            img_dt, _ = self.get_datetime_from_panel(panel)
+            img_dt = self.get_datetime_from_panel(panel)
 
             if img_dt is not None:
                 labels = self.parseq_parse(img_dt)

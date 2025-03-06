@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   dice-app:
-    image: dice-detection-app:1.0
+    image: dice-detection-app:1.1
     container_name: dice_detection_app
     build: .
     volumes:
