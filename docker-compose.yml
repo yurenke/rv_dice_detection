@@ -2,13 +2,14 @@ version: '3.8'
 
 services:
   dice-app:
-    image: dice-detection-app:1.1
+    image: dice-detection-app:1.6
     container_name: dice_detection_app
     build: .
     volumes:
       - ./models:/app/models
       - ./configs:/app/configs
       - ./logs:/app/logs
+      - ./images:/app/images
     depends_on:
       - mysql  # 確保先啟動 MySQL 容器
     networks:

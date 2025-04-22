@@ -26,8 +26,6 @@ class DiceCupBaseDetector():
         self.detect_ymin = self.config['dice_cup_base_detection_area']['ymin']
         self.detect_xmax = self.config['dice_cup_base_detection_area']['xmax']
         self.detect_ymax = self.config['dice_cup_base_detection_area']['ymax']
-        self.dice_detection_zone_width = self.config['dice_detection_zone_width']
-        self.dice_detection_zone_height = self.config['dice_detection_zone_height']
         self.load_model()
 
     def load_model(self):
@@ -45,10 +43,7 @@ class DiceCupBaseDetector():
             box_width = xmax - xmin
 
             if box_width > 450:
-                new_ymin = max(0, ymax - self.dice_detection_zone_height)
-
-                # return True, detect_area[new_ymin: new_ymin + self.dice_detection_zone_height, xmin: xmin + self.dice_detection_zone_width] # 固定每次偵測骰子的範圍大小
-                return True, detect_area[new_ymin: ymax, xmin: xmin + self.dice_detection_zone_width]
+                return True, detect_area, xmin, ymin, xmax, ymax
             
-        return False, None
+        return False, None, 0, 0, 0, 0
 

@@ -37,6 +37,7 @@ class VideoStream:
 
         while True:
             self.logger.info(f"[VS] Trying to connect to {self.src}")
+            # self.cap = cv2.VideoCapture(self.src)
             self.cap = cv2.VideoCapture(self.src)
             if self.cap.isOpened():
                 self.logger.info("[VS] Stream connected !!")
