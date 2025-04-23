@@ -107,10 +107,10 @@ class DiceApp:
         cv2.imwrite(filepath, image)
 
         # 清除過期資料夾
-        self.cleanup_old_folders(self.image_dir, self.image_keep_days)
+        self.cleanup_old_folders(self.image_dir, date_str, self.image_keep_days)
 
-    def cleanup_old_folders(self, base_dir, keep_days):
-        today = datetime.now().date()
+    def cleanup_old_folders(self, base_dir, current_date_str, keep_days):
+        today = datetime.strptime(current_date_str, "%Y-%m-%d").date()
         folders = [f for f in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, f))]
 
         for folder in folders:
