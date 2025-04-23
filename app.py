@@ -41,6 +41,7 @@ class DiceApp:
         self.detect_ymin = self.config['detector']['dice_cup_base_detection_area']['ymin']
         self.detect_xmax = self.config['detector']['dice_cup_base_detection_area']['xmax']
         self.detect_ymax = self.config['detector']['dice_cup_base_detection_area']['ymax']
+        self.pixel_diff_threshold = self.config['detector']['pixel_diff_threshold']
 
         self.image_dir = self.config['images']['save_dir']
         self.image_keep_days = self.config['images']['keep_days']
@@ -226,7 +227,7 @@ class DiceApp:
             current_positions = current_positions[sorted_index]
             # current_abs_positions = current_abs_positions[sorted_index]
 
-            if self.previous_positions is not None and not np.allclose(self.previous_positions, current_positions, atol=10):
+            if self.previous_positions is not None and not np.allclose(self.previous_positions, current_positions, atol=self.pixel_diff_threshold):
                 self.stable_count = 0  # 重新計算穩定次數
                 if self.dice_state == DiceState.STILL:
                     self.logger.info("[DiceApp] Dice rolling detected!!")
