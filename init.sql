@@ -3,7 +3,6 @@ USE dicedb;
 CREATE TABLE dice_results (
     id INT AUTO_INCREMENT PRIMARY KEY,
     dicelist CHAR(17) NOT NULL,
-    detectedtime DATETIME NULL,
     systemtime DATETIME NOT NULL
 );
 

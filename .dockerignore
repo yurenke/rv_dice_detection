@@ -1,5 +1,7 @@
 models/*
 configs/*
 logs/*
+images/*
+training_data/*
 *.sql
 __pycache__/

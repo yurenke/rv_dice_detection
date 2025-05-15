@@ -22,7 +22,7 @@ class Database:
             self.logger.error(f"[DB] Failed to connect to DB: {e}")
             return None
         
-    def insert_log(self, dices, system_time, detected_time=None):
+    def insert_log(self, dices, system_time):
         """
         插入一筆記錄：
         - `DICES`: 需要為字串
@@ -36,10 +36,10 @@ class Database:
         try:
             with conn.cursor() as cursor:
                 sql = f"""
-                INSERT INTO `{self.config['table']}` (dicelist, detectedtime, systemtime)
-                VALUES (%s, %s, %s)
+                INSERT INTO `{self.config['table']}` (dicelist, systemtime)
+                VALUES (%s, %s)
                 """
-                cursor.execute(sql, (dices, detected_time, system_time))
+                cursor.execute(sql, (dices, system_time))
                 conn.commit()
                 self.logger.info("[DB] Insert OK!")
         except Exception as e:

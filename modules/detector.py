@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import torch
 import cv2
 from ultralytics import YOLO
@@ -16,8 +17,18 @@ class DiceDetector():
         results = self.model(img, verbose=False)
         detections = results[0].boxes.data.cpu().numpy()  # (xmin, ymin, xmax, ymax, confidence, class)
         # confidence必須夠高，否則視為仍模糊在滾動無法清楚辨識
-        dice_detections = [d for d in detections if d[4] >= 0.9]
-        return dice_detections
+        # 先過濾信心值夠高的
+        filtered = [d for d in detections if d[4] >= 0.9]
+        filtered = np.array(filtered)  # 轉回 numpy array
+
+        # 再排序
+        if len(filtered) > 0:
+            sorted_indices = np.argsort(filtered[:, 4])[::-1]
+            top3_detections = filtered[sorted_indices[:3]]
+        else:
+            top3_detections = np.array([])  # 沒有任何符合條件的
+        
+        return top3_detections
     
 class DiceCupBaseDetector():
     def __init__(self, config) -> None:

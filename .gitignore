@@ -2,4 +2,5 @@ models/*
 configs/*
 logs/*
 images/*
+training_data/*
 __pycache__/
